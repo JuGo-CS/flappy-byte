@@ -1,5 +1,5 @@
-main.o: \
- C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/main.c \
+byte_flag.o: \
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/byte_flag.c \
  C:/devkitPRO/libtonc/include/tonc.h \
  C:/devkitPRO/libtonc/include/tonc_types.h \
  C:/devkitPRO/libtonc/include/tonc_memmap.h \
@@ -15,9 +15,7 @@ main.o: \
  C:/devkitPRO/libtonc/include/tonc_video.h \
  C:/devkitPRO/libtonc/include/tonc_nocash.h \
  C:/devkitPRO/libtonc/include/tonc_text.h \
- C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/ball.h \
- C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/byte_flag.h \
- C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background.h
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/byte_flag.h
 C:/devkitPRO/libtonc/include/tonc.h:
 C:/devkitPRO/libtonc/include/tonc_types.h:
 C:/devkitPRO/libtonc/include/tonc_memmap.h:
@@ -33,6 +31,4 @@ C:/devkitPRO/libtonc/include/tonc_surface.h:
 C:/devkitPRO/libtonc/include/tonc_video.h:
 C:/devkitPRO/libtonc/include/tonc_nocash.h:
 C:/devkitPRO/libtonc/include/tonc_text.h:
-C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/ball.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/byte_flag.h:
-C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background.h:
