@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "ball.h"
+#include "bytes.h"
 #include "../graphics/game_ball.h"
 
 #define BALL_X 25

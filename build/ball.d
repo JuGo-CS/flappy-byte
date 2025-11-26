@@ -16,6 +16,7 @@ ball.o: \
  C:/devkitPRO/libtonc/include/tonc_nocash.h \
  C:/devkitPRO/libtonc/include/tonc_text.h \
  C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/ball.h \
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/bytes.h \
  C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_ball.h
 C:/devkitPRO/libtonc/include/tonc.h:
 C:/devkitPRO/libtonc/include/tonc_types.h:
@@ -33,4 +34,5 @@ C:/devkitPRO/libtonc/include/tonc_video.h:
 C:/devkitPRO/libtonc/include/tonc_nocash.h:
 C:/devkitPRO/libtonc/include/tonc_text.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/ball.h:
+C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/bytes.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_ball.h:

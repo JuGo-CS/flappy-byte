@@ -3,13 +3,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include "pipes.h"
-#include <time.h>
+#include "bytes.h"
 #include "../graphics/game_pipes_topright.h"
 #include "../graphics/game_pipes_topleft.h"
 #include "../graphics/game_pipes_bottomright.h"
 #include "../graphics/game_pipes_bottomleft.h"
 
 extern OBJ_ATTR obj_buffer[128];
+extern bool byte_updated;
+extern bool pipe_passed;
+extern int game_frame_counter;
 
 // configuration
 int pipes_posX = 240;
@@ -163,15 +166,21 @@ void random_pipes()
 
 void pipes_update()
 {
-    pipes_posX -= pipe_speed;
-    update_all_pipes_attr1_X(pipes_posX);
+    // int temporary = game_frame_counter;
+    if(game_frame_counter % 1 == 0){
+        pipes_posX -= pipe_speed;
+        update_all_pipes_attr1_X(pipes_posX);
+    }
+    
 
     // reset (wrap-around)
     if(pipes_posX <= OFFSCREEN_LEFT)
     {
         // choose new random heights and place back at right
         random_pipes();
+        byte_updated = false;
     }
+
 }
 
 void reset_pipes(){
