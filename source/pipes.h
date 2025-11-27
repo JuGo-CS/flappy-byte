@@ -24,7 +24,9 @@ void random_pipes(void);
 
 void reset_pipes(void);
 
+// static void calculate_pipe_values(int i);
 
-bool pipes_check_collision(int ball_x, int ball_y);
+
+int pipes_check_collision(int ball_x, int ball_y);
 
 #endif

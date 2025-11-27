@@ -1,4 +1,4 @@
-// pipes.c  — fixed & refactored
+// pipes.c — fixed & refactored
 #include <tonc.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,14 +15,17 @@ extern bool pipe_passed;
 extern int game_frame_counter;
 
 // configuration
-int pipes_posX = 240;
-// static const int SCREEN_RIGHT = 240;
-static const int RESET_X = 240;
-static const int OFFSCREEN_LEFT = -16;
+int pipes_posX = 264;
+static const int RESET_X = 264;
+static const int OFFSCREEN_LEFT = -40;
 int pipe_speed = 1;
 
-// We have 4 pipes, each pipe uses 4 OBJ_ATTRs (tl,tr,bl,br)
+#define PIPE_DISPLAY_BASE 36
 #define NUM_PIPES 4
+static unsigned char pipe_correct_value;  // Single correct value for the set
+static unsigned char pipe_incorrect_value;  // Single decoy value for the set
+static int display_y[2];  // Y positions for the two displays
+static bool is_correct[2];  // Which display has the correct value
 
 static OBJ_ATTR *pipe_tl[NUM_PIPES];
 static OBJ_ATTR *pipe_tr[NUM_PIPES];
@@ -32,13 +35,25 @@ static OBJ_ATTR *pipe_br[NUM_PIPES];
 // Y positions for each pipe (top tile Y)
 static int pipe_posY[NUM_PIPES] = {23, 23, 23, 23};
 
+static void draw_pipe_values(int posX)
+{
+    // Draw correct value at display_y[0] if is_correct[0], else decoy
+    unsigned char value0 = is_correct[0] ? pipe_correct_value : pipe_incorrect_value;
+    draw_byte_bits(value0, posX - 4, display_y[0], PIPE_DISPLAY_BASE);
+
+    // Draw correct value at display_y[1] if is_correct[1], else decoy
+    unsigned char value1 = is_correct[1] ? pipe_correct_value : pipe_incorrect_value;
+    draw_byte_bits(value1, posX - 4, display_y[1], PIPE_DISPLAY_BASE + 8);
+}
+
+static void clear_pipe_values()
+{
+    clear_byte_bits(0, 0, PIPE_DISPLAY_BASE);      // Clear first byte
+    clear_byte_bits(0, 0, PIPE_DISPLAY_BASE + 8);  // Clear second byte
+}
 
 static void set_single_piece(OBJ_ATTR *o, int x, int y, u16 palbank, u16 tile_index)
 {
-    // ATTR0_SQUARE | ATTR0_4BPP: 8x8, 4bpp
-    // ATTR1_SIZE_8: size 8x8
-    // ATTR2_BUILD(tile_index, palbank, 0): Use tile_index in OBJ charblock 0 (default), with specified palbank and prio 0
-    // Removed invalid 'charblock' param—OBJ only uses charblock 4 (index 0 in tonc).
     obj_set_attr(o,
         ATTR0_SQUARE | ATTR0_4BPP | (y & 0xFF),
         ATTR1_SIZE_8 | (x & 0x1FF),
@@ -46,34 +61,26 @@ static void set_single_piece(OBJ_ATTR *o, int x, int y, u16 palbank, u16 tile_in
     );
 }
 
-
 static void set_pipe_sprites_for_pipe(int i, int posX, int posY)
 {
-    // Each corner uses its own tile index in charblock 0 (starting from 1 to avoid ball's tile at 0)
-    set_single_piece(pipe_tl[i], posX, posY, 1, 1); // topleft -> tile 1
-    set_single_piece(pipe_tr[i], posX+8, posY, 2, 2); // topright -> tile 2
-    set_single_piece(pipe_bl[i], posX, posY+8, 3, 3); // bottomleft -> tile 3
-    set_single_piece(pipe_br[i], posX+8, posY+8, 4, 4); // bottomright -> tile 4
+    set_single_piece(pipe_tl[i], posX, posY, 1, 1);
+    set_single_piece(pipe_tr[i], posX+8, posY, 2, 2);
+    set_single_piece(pipe_bl[i], posX, posY+8, 3, 3);
+    set_single_piece(pipe_br[i], posX+8, posY+8, 4, 4);
 }
 
-// --- public API --------------------------------------------------------------
 void pipes_init()
 {
-    // load palettes into OBJ palette memory (use pal banks 1..4) — this is already correct
-    memcpy(&pal_obj_mem[16], game_pipes_topleftPal, 32);      // palbank 1
-    memcpy(&pal_obj_mem[32], game_pipes_toprightPal, 32);    // palbank 2
-    memcpy(&pal_obj_mem[48], game_pipes_bottomleftPal, 32);// palbank 3
-    memcpy(&pal_obj_mem[64], game_pipes_bottomrightPal, 32);// palbank 4
+    memcpy(&pal_obj_mem[16], game_pipes_topleftPal, 32);
+    memcpy(&pal_obj_mem[32], game_pipes_toprightPal, 32);
+    memcpy(&pal_obj_mem[48], game_pipes_bottomleftPal, 32);
+    memcpy(&pal_obj_mem[64], game_pipes_bottomrightPal, 32);
 
-    // load tiles into OBJ VRAM (charblock 0, starting from tile 1 to avoid ball's tile at 0)
-    // Changed from tile_mem_obj[1][n] to [0][n] — [1] is BG VRAM, not OBJ!
-    memcpy(&tile_mem_obj[0][1], game_pipes_topleftTiles, game_pipes_topleftTilesLen);      // tile 1
-    memcpy(&tile_mem_obj[0][2], game_pipes_toprightTiles, game_pipes_toprightTilesLen);    // tile 2
-    memcpy(&tile_mem_obj[0][3], game_pipes_bottomleftTiles, game_pipes_bottomleftTilesLen); // tile 3
-    memcpy(&tile_mem_obj[0][4], game_pipes_bottomrightTiles, game_pipes_bottomrightTilesLen); // tile 4
+    memcpy(&tile_mem_obj[0][1], game_pipes_topleftTiles, game_pipes_topleftTilesLen);
+    memcpy(&tile_mem_obj[0][2], game_pipes_toprightTiles, game_pipes_toprightTilesLen);
+    memcpy(&tile_mem_obj[0][3], game_pipes_bottomleftTiles, game_pipes_bottomleftTilesLen);
+    memcpy(&tile_mem_obj[0][4], game_pipes_bottomrightTiles, game_pipes_bottomrightTilesLen);
 
-    // assign obj_buffer slots (1..16 used for pipe pieces) — unchanged
-    // Pipe 0 uses slots 1..4, Pipe 1 uses 5..8, Pipe 2 uses 9..12, Pipe 3 uses 13..16
     for(int i = 0; i < NUM_PIPES; i++)
     {
         int base = 1 + i * 4;
@@ -87,19 +94,31 @@ void pipes_init()
     pipes_posX = RESET_X;
     for(int i = 0; i < NUM_PIPES; i++)
         set_pipe_sprites_for_pipe(i, pipes_posX, pipe_posY[i]);
-
-    // pipe_posY[0] = 23;
-    // pipe_posY[1] = 39;
-    // pipe_posY[2] = 56;
-    // pipe_posY[3] = 107;
-
-    // set initial positions: horizontally stacked at the same X (they move together)
-    pipes_posX = RESET_X;
-    
 }
 
+static void calculate_pipe_values()
+{
+    extern unsigned char game_byte, random_byte;
+    extern const char* current_gate;
+    unsigned char correct = game_byte;
+    if (strcmp(current_gate, "NOT") == 0) {
+        correct = ~game_byte;
+    } else if (strcmp(current_gate, "AND") == 0) {
+        correct &= random_byte;
+    } else if (strcmp(current_gate, "OR") == 0) {
+        correct |= random_byte;
+    } else if (strcmp(current_gate, "XOR") == 0) {
+        correct ^= random_byte;
+    }
+    pipe_correct_value = correct;
+    pipe_incorrect_value = ~correct;  // Decoy: bitwise NOT
 
-// update attr1 X for all pipe pieces (called on movement) — unchanged
+    // Randomly assign correct to one of the two displays
+    bool correct_at_first = (rand() % 2) == 0;
+    is_correct[0] = correct_at_first;
+    is_correct[1] = !correct_at_first;
+}
+
 static void update_all_pipes_attr1_X(int posX)
 {
     for(int i = 0; i < NUM_PIPES; i++)
@@ -111,7 +130,6 @@ static void update_all_pipes_attr1_X(int posX)
     }
 }
 
-// update attr0 Y for a pipe (used after randomizing Y) — unchanged
 static void update_pipe_attr0_Y(int i)
 {
     int y = pipe_posY[i] & 0xFF;
@@ -121,7 +139,6 @@ static void update_pipe_attr0_Y(int i)
     pipe_br[i]->attr0 = (pipe_br[i]->attr0 & ~0xFF) | ((y + 8) & 0xFF);
 }
 
-// type: 0..2 selects a preset pattern for the 4 pipes — unchanged
 void pipe_randomizer(int type)
 {
     pipes_posX = RESET_X;
@@ -133,99 +150,94 @@ void pipe_randomizer(int type)
             pipe_posY[1] = 75;
             pipe_posY[2] = 91;
             pipe_posY[3] = 107;
+            display_y[0] = 23;  // Correct/decoy at top of first opening
+            display_y[1] = 123; // Correct/decoy at top of second opening
             break;
-
         case 1:
             pipe_posY[0] = 59;
             pipe_posY[1] = 111;
             pipe_posY[2] = 127;
             pipe_posY[3] = 143;
+            display_y[0] = 23;  // Correct/decoy at top of first opening
+            display_y[1] = 75; // Correct/decoy at top of second opening
             break;
-
         case 2:
         default:
             pipe_posY[0] = 23;
             pipe_posY[1] = 39;
             pipe_posY[2] = 55;
             pipe_posY[3] = 107;
+            display_y[0] = 71;  // Correct/decoy at top of first opening (based on your description)
+            display_y[1] = 123; // Correct/decoy at top of second opening
             break;
     }
 
-    // Update sprite Y positions (attr0) to match new pipe_posY[]
     for(int i = 0; i < NUM_PIPES; i++)
         update_pipe_attr0_Y(i);
-
-    // update X (so visible immediately)
     update_all_pipes_attr1_X(pipes_posX);
 }
 
 void random_pipes()
 {
     pipe_randomizer(rand() % 3);
+    calculate_pipe_values();  // Calculate single correct/decoy for the set
+    draw_pipe_values(pipes_posX - 32);  // Draw the two bytes
 }
 
 void pipes_update()
 {
-    // int temporary = game_frame_counter;
     if(game_frame_counter % 1 == 0){
         pipes_posX -= pipe_speed;
         update_all_pipes_attr1_X(pipes_posX);
-    }
-    
 
-    // reset (wrap-around)
+        // Update X for the 16 display sprites
+        int new_x = pipes_posX - 24;
+        for(int j = 0; j < 16; j++)
+            obj_buffer[PIPE_DISPLAY_BASE + j].attr1 = (obj_buffer[PIPE_DISPLAY_BASE + j].attr1 & ~0x1FF) | ((new_x + (j % 8) * 8) & 0x1FF);
+    }
+
     if(pipes_posX <= OFFSCREEN_LEFT)
     {
-        // choose new random heights and place back at right
         random_pipes();
         byte_updated = false;
     }
-
 }
 
 void reset_pipes(){
     pipes_posX = RESET_X;
     pipe_speed = 1;
-
     random_pipes();
     update_all_pipes_attr1_X(pipes_posX);
+    clear_pipe_values();
 }
 
-bool pipes_check_collision(int ball_x, int ball_y)
+int pipes_check_collision(int ball_x, int ball_y)
 {
-    int ball_left   = ball_x;
-    int ball_right  = ball_x + 8;
-    int ball_top    = ball_y;
+    int ball_left = ball_x;
+    int ball_right = ball_x + 8;
+    int ball_top = ball_y;
     int ball_bottom = ball_y + 8;
 
+    // Check pipe blocks (die)
     for(int i = 0; i < NUM_PIPES; i++)
     {
         int x0 = pipes_posX;
-        int x1 = pipes_posX + 8;
-
-        int y0 = pipe_posY[i];
-        int y1 = pipe_posY[i] + 8;
-
-        // TL block
-        if(ball_right > x0 && ball_left < x0+8 &&
-           ball_bottom > y0 && ball_top < y0+8)
-            return true;
-
-        // TR block
-        if(ball_right > x1 && ball_left < x1+8 &&
-           ball_bottom > y0 && ball_top < y0+8)
-            return true;
-
-        // BL block
-        if(ball_right > x0 && ball_left < x0+8 &&
-           ball_bottom > y1 && ball_top < y1+8)
-            return true;
-
-        // BR block
-        if(ball_right > x1 && ball_left < x1+8 &&
-           ball_bottom > y1 && ball_top < y1+8)
-            return true;
+        int x1 = pipes_posX + 16;
+        if ((ball_right > x0 && ball_left < x1 && ball_bottom > pipe_posY[i] && ball_top < pipe_posY[i] + 8) ||
+            (ball_right > x0 && ball_left < x1 && ball_bottom > pipe_posY[i] + 8 && ball_top < pipe_posY[i] + 16))
+            return 1;  // Hit pipe
     }
 
-    return false;
+    // Check the two openings at display_y (8-pixel height for simplicity)
+    int x0 = pipes_posX;
+    int x1 = pipes_posX + 16;
+    if (ball_right > x0 && ball_left < x1) {
+        if (ball_bottom > display_y[0] && ball_top < display_y[0] + 8) {
+            return is_correct[0] ? 2 : 3;  // Correct or decoy at first Y
+        }
+        if (ball_bottom > display_y[1] && ball_top < display_y[1] + 8) {
+            return is_correct[1] ? 2 : 3;  // Correct or decoy at second Y
+        }
+    }
+    return 0;  // No collision
 }

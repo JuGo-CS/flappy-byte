@@ -19,7 +19,10 @@ main.o: \
  C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/pipes.h \
  C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/bytes.h \
  C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_ball.h \
- C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background_ver2.h
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background_ver2.h \
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/homescreen_state1.h \
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/homescreen_state2.h \
+ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background_ver2_restart.h
 C:/devkitPRO/libtonc/include/tonc.h:
 C:/devkitPRO/libtonc/include/tonc_types.h:
 C:/devkitPRO/libtonc/include/tonc_memmap.h:
@@ -40,3 +43,6 @@ C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/pipes.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/source/bytes.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_ball.h:
 C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background_ver2.h:
+C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/homescreen_state1.h:
+C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/homescreen_state2.h:
+C:/CODING_FILE/Vscode/3rdYear-1stSem/cmsc_sp/flappy-byte/graphics/game_background_ver2_restart.h:
