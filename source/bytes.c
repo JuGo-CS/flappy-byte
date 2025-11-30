@@ -6,6 +6,7 @@
 extern OBJ_ATTR obj_buffer[128];  // Reference the global buffer
 extern bool byte_updated;
 extern bool pipe_passed;
+extern int game_score;
 
 unsigned char game_byte = 0;  // Initialize to 0
 unsigned char random_byte = 0;
@@ -18,14 +19,9 @@ const char* logic_gates[] = {"AND","OR","XOR","NOT"};
 // Static flag to ensure font is loaded only once
 static bool font_initialized = false;
 
-// ------------------------------------------------------------------
-// Generate a random byte (8 bits)
-// ------------------------------------------------------------------
-// const int letter_tiles[26] = {0,0,0,0,0,0,7,8,9,0,10,0,0,0,11,0,0,12,0,13,0,0,0,0,0,0};  // A=7, N=8, D=9, X=10, O=11, R=12, T=13
 const int letter_tiles[26] = {7,0,0,9,0,0,0,0,0,0,0,0,0,8,11,0,0,12,0,13,0,0,0,10,0,0};
 
-unsigned char generate_next_byte(void)
-{
+unsigned char generate_next_byte(void) {
     unsigned char result = 0;
     for(int i=0;i<8;i++)
     {
@@ -38,8 +34,7 @@ unsigned char generate_next_byte(void)
 // ------------------------------------------------------------------
 // Pick a random logic gate
 // ------------------------------------------------------------------
-const char* generate_next_flag(void)
-{
+const char* generate_next_flag(void) {
     // int count = sizeof(logic_gates)/sizeof(logic_gates[0]);
     return logic_gates[rand() % 4];
 }
@@ -47,10 +42,8 @@ const char* generate_next_flag(void)
 // ------------------------------------------------------------------
 // Initialize font tiles for OBJ (called once)
 // ------------------------------------------------------------------
-static void init_font(void)
-{
-    if (!font_initialized)
-    {
+static void init_font(void) {
+    if (!font_initialized) {
         // Load simple font tiles into OBJ VRAM (tiles 5 and 6, after ball/pipes)
         const u32 font_tiles[17][8] = {
             {0x00011000, 0x00111100, 0x01100110, 0x01100110, 0x01100110, 0x01100110, 0x00111100, 0x00011000},   // 0
@@ -63,31 +56,30 @@ static void init_font(void)
             {0x11111111, 0x11000011, 0x11000011, 0x00111111, 0x00011111, 0x01110011, 0x11100011, 0x11000011},   // R ito
             {0x01111110, 0x01111110, 0x00011000, 0x00011000, 0x00011000, 0x00011000, 0x00011000, 0x00011000},   // T
 
-            {0x11111111, 0x11000011, 0x10000110, 0x00001100, 0x00011000, 0x00110000, 0x01100000, 0x11111111},   // 2
-            {0x11111111, 0x11000011, 0x10000011, 0x00011111, 0x00011111, 0x10000011, 0x11000011, 0x11111111},   // 3
-            {0x00011011, 0x00110011, 0x01100011, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x00000011},   // 4
-            {0x11111111, 0x11000000, 0x11000000, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x11111111},   // 5
-            {0x11111111, 0x11000000, 0x11000000, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 6
-            {0x01111111, 0x00000011, 0x00000011, 0x00000110, 0x00001100, 0x00011000, 0x00110000, 0x01100000},   // 7
-            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 8 
-            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x00000011}    // 9
+            {0x11111111, 0x11000011, 0x01100001, 0x00110000, 0x00011000, 0x00001100, 0x10000110, 0x11111111},   // 2 
+            {0x11111111, 0x11000011, 0x11000001, 0x11111000, 0x11111000, 0x11000001, 0x11000011, 0x11111111},   // 3
+            {0x11011000, 0x11001100, 0x11000110, 0x11111111, 0x11000000, 0x11000000, 0x11000000, 0x11000000},   // 4
+            {0x11111111, 0x00000011, 0x00000011, 0x11111111, 0x11000000, 0x11000000, 0x11000000, 0x11111111},   // 5
+            {0x11111111, 0x00000011, 0x00000011, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 6 
+            {0x11111110, 0x11000000, 0x11000000, 0x01100000, 0x00110000, 0x00011000, 0x00001100, 0x00000110},   // 7
+            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 8
+            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x11000000, 0x11000000, 0x11000000, 0x11000000}    // 9
 
 
         };
-        // memcpy(&tile_mem_obj[0][5], font_tiles[0], 32);  // '0' at OBJ tile 5
-        // memcpy(&tile_mem_obj[0][6], font_tiles[1], 32);  // '1' at OBJ tile 6
-        for(int i=0; i<17; i++)
+
+        for(int i=0; i<17; i++){
             memcpy(&tile_mem_obj[0][5+i], font_tiles[i], 32);
+        }
+
         font_initialized = true;
     }
 }
 
-
-
-
-void draw_gate(const char* gate, int y)
-{
-    if (!gate) return;
+void draw_gate(const char* gate, int y) {
+    if (!gate) {
+        return;
+    }
     init_font();
     clear_gate();
     
@@ -99,8 +91,7 @@ void draw_gate(const char* gate, int y)
         len = 2;  // Only 2 letters
     }
     
-    for(int i=0; i<len; i++)
-    {
+    for(int i=0; i<len; i++) {
         char letter = gate[i];
         int tile_id = (letter >= 'A' && letter <= 'Z') ? letter_tiles[letter - 'A'] : 5;  // Default to '0' if invalid
         int obj_id = 33 + i;  // Slots 33-35 for letters
@@ -114,26 +105,19 @@ void draw_gate(const char* gate, int y)
     }
 }
 
-void clear_gate(void)
-{
-    for(int i=0; i<3; i++)
-    {
+void clear_gate(void) {
+    for(int i=0; i<3; i++) {
         int obj_id = 33 + i;
         obj_buffer[obj_id].attr0 = ATTR0_HIDE;
     }
 }
-
-
 // ------------------------------------------------------------------
 // Draw a byte as 8-bit OBJ sprites at exact pixel location
 // pixel_x, pixel_y = top-left of first bit
 // ------------------------------------------------------------------
-// ------------------------------------------------------------------
-void draw_byte_bits(unsigned char value, int pixel_x, int pixel_y, int base_obj_id)
-{
+void draw_byte_bits(unsigned char value, int pixel_x, int pixel_y, int base_obj_id) {
     init_font();  // Ensure font is loaded
-    for(int i=0; i<8; i++)
-    {
+    for(int i=0; i<8; i++) {
         int bit = (value & (1 << (7-i))) ? 1 : 0;
         int tile_id = bit ? 6 : 5;  // Tile 5 for '0', 6 for '1'
 
@@ -149,18 +133,16 @@ void draw_byte_bits(unsigned char value, int pixel_x, int pixel_y, int base_obj_
         OBJ_ATTR *obj = &obj_buffer[obj_id];
 
         obj_set_attr(obj,
-            apply_byte_logic | ATTR0_4BPP | (pixel_y & 0xFF),          // 8x8, 4BPP, Y position
+            ATTR0_SQUARE | ATTR0_4BPP | (pixel_y & 0xFF),          // 8x8, 4BPP, Y position
             ATTR1_SIZE_8 | ((pixel_x + i*8) & 0x1FF),             // X position (8 pixels per bit)
             ATTR2_BUILD(tile_id, 0, 0)  // Tile 5 or 6, palette 0 (ball's colors)
         );
     }
 }
-
 // ------------------------------------------------------------------
 // Clear previous byte sprites (hide them)
 // ------------------------------------------------------------------
-void clear_byte_bits(int pixel_x, int pixel_y, int base_obj_id)
-{
+void clear_byte_bits(int pixel_x, int pixel_y, int base_obj_id) {
     int base_id;
     if (base_obj_id != -1) {
         // Use dynamic base for pipes
@@ -169,20 +151,16 @@ void clear_byte_bits(int pixel_x, int pixel_y, int base_obj_id)
         // Original logic
         base_id = (pixel_x == 30) ? 17 : 25;
     }
-    for(int i=0; i<8; i++)
-    {
+    for(int i=0; i<8; i++) {
         int obj_id = base_id + i;
         obj_buffer[obj_id].attr0 = ATTR0_HIDE;  // Hide the sprite
-        if (pixel_x == 150 || base_obj_id != -1) clear_gate();  // Only clear gate for right byte or pipes
+        if (pixel_x == 150 || base_obj_id != -1) {
+            clear_gate();  // Only clear gate for right byte or pipes
+        }
     }
 }
 
-
-void byte_logic(void)
-{
-    // Clear previous text sprites
-    // clear_byte_bits(30, 12);
-    // clear_byte_bits(150, 12);
+void byte_logic(void) {
     clear_byte_bits(150, 12, -1);
 
     random_byte = generate_next_byte();
@@ -198,9 +176,10 @@ void byte_logic(void)
     }
 }
 
-void apply_byte_logic(void)
-{
-    if (!current_gate) return;
+void apply_byte_logic(void) {
+    if (!current_gate) {
+        return;
+    }
     
     // Apply logic to game_byte
     if (strcmp(current_gate, "NOT") == 0) {
@@ -216,4 +195,55 @@ void apply_byte_logic(void)
     }
     draw_byte_bits(game_byte, 30, 12, -1);
     // byte_logic();
+}
+
+void draw_score(int score, int x, int y) {
+    init_font();  // Ensure font is loaded
+    
+    // Clear previous score sprites (slots 52-56 for up to 5 digits)
+    for(int i = 0; i < 5; i++) {
+        obj_buffer[52 + i].attr0 = ATTR0_HIDE;
+    }
+    
+    if (score == 0) {
+        // Special case: Draw '0' at the first position
+        OBJ_ATTR *obj = &obj_buffer[52];
+        obj_set_attr(obj,
+            ATTR0_SQUARE | ATTR0_4BPP | (y & 0xFF),
+            ATTR1_SIZE_8 | (x & 0x1FF),
+            ATTR2_BUILD(5, 0, 0)  // Tile 5 = '0'
+        );
+        return;
+    }
+    
+    // Convert score to digits (up to 5)
+    int digits[5];
+    int len = 0;
+    int temp = score;
+    while (temp > 0 && len < 5) {
+        digits[len++] = temp % 10;
+        temp /= 10;
+    }
+    
+    // Draw digits from left to right (MSB first)
+    for(int i = 0; i < len; i++) {
+        int digit = digits[len - 1 - i];  // Get digit (0-9)
+        int tile_id;
+        if(digit == 0) {
+            tile_id = 5;
+        }
+        else if(digit == 1) {
+            tile_id = 6;
+        }
+        else {
+            tile_id = 12 + digit; 
+        }
+        
+        OBJ_ATTR *obj = &obj_buffer[52 + i];
+        obj_set_attr(obj,
+            ATTR0_SQUARE | ATTR0_4BPP | (y & 0xFF),
+            ATTR1_SIZE_8 | ((x + i * 10) & 0x1FF),  // 8 pixels per digit
+            ATTR2_BUILD(tile_id, 0, 0)
+        );
+    }
 }

@@ -22,6 +22,7 @@ const char* generate_next_flag(void);
 void apply_byte_logic(void);
 void draw_binary_pipes(unsigned char value, int pixel_x, int pixel_y, int base_obj_id);
 void clear_binary_pipes(int base_obj_id);
+void draw_score(int score, int x, int y);
 
 
 
