@@ -52,7 +52,7 @@ static void init_font(void)
     if (!font_initialized)
     {
         // Load simple font tiles into OBJ VRAM (tiles 5 and 6, after ball/pipes)
-        const u32 font_tiles[9][8] = {
+        const u32 font_tiles[17][8] = {
             {0x00011000, 0x00111100, 0x01100110, 0x01100110, 0x01100110, 0x01100110, 0x00111100, 0x00011000},   // 0
             {0x00100000, 0x00111000, 0x00110100, 0x00110000, 0x00110000, 0x00110000, 0x00110000, 0x11111100},   // 1
             {0x00011000, 0x01100110, 0x01100110, 0x01111110, 0x01100110, 0x01100110, 0x01100110, 0x01100110},   // A 
@@ -62,14 +62,28 @@ static void init_font(void)
             {0x01111110, 0x01111110, 0x01100110, 0x01100110, 0x01100110, 0x01100110, 0x01111110, 0x01111110},   // O
             {0x11111111, 0x11000011, 0x11000011, 0x00111111, 0x00011111, 0x01110011, 0x11100011, 0x11000011},   // R ito
             {0x01111110, 0x01111110, 0x00011000, 0x00011000, 0x00011000, 0x00011000, 0x00011000, 0x00011000},   // T
+
+            {0x11111111, 0x11000011, 0x10000110, 0x00001100, 0x00011000, 0x00110000, 0x01100000, 0x11111111},   // 2
+            {0x11111111, 0x11000011, 0x10000011, 0x00011111, 0x00011111, 0x10000011, 0x11000011, 0x11111111},   // 3
+            {0x00011011, 0x00110011, 0x01100011, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x00000011},   // 4
+            {0x11111111, 0x11000000, 0x11000000, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x11111111},   // 5
+            {0x11111111, 0x11000000, 0x11000000, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 6
+            {0x01111111, 0x00000011, 0x00000011, 0x00000110, 0x00001100, 0x00011000, 0x00110000, 0x01100000},   // 7
+            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x11000011, 0x11000011, 0x11000011, 0x11111111},   // 8 
+            {0x11111111, 0x11000011, 0x11000011, 0x11111111, 0x00000011, 0x00000011, 0x00000011, 0x00000011}    // 9
+
+
         };
         // memcpy(&tile_mem_obj[0][5], font_tiles[0], 32);  // '0' at OBJ tile 5
         // memcpy(&tile_mem_obj[0][6], font_tiles[1], 32);  // '1' at OBJ tile 6
-        for(int i=0; i<9; i++)
+        for(int i=0; i<17; i++)
             memcpy(&tile_mem_obj[0][5+i], font_tiles[i], 32);
         font_initialized = true;
     }
 }
+
+
+
 
 void draw_gate(const char* gate, int y)
 {
@@ -135,7 +149,7 @@ void draw_byte_bits(unsigned char value, int pixel_x, int pixel_y, int base_obj_
         OBJ_ATTR *obj = &obj_buffer[obj_id];
 
         obj_set_attr(obj,
-            ATTR0_SQUARE | ATTR0_4BPP | (pixel_y & 0xFF),          // 8x8, 4BPP, Y position
+            apply_byte_logic | ATTR0_4BPP | (pixel_y & 0xFF),          // 8x8, 4BPP, Y position
             ATTR1_SIZE_8 | ((pixel_x + i*8) & 0x1FF),             // X position (8 pixels per bit)
             ATTR2_BUILD(tile_id, 0, 0)  // Tile 5 or 6, palette 0 (ball's colors)
         );

@@ -185,7 +185,7 @@ void random_pipes()
 
 void pipes_update()
 {
-    if(game_frame_counter % 1 == 0){
+    // if(game_frame_counter % 1 == 0){
         pipes_posX -= pipe_speed;
         update_all_pipes_attr1_X(pipes_posX);
 
@@ -193,7 +193,7 @@ void pipes_update()
         int new_x = pipes_posX - 24;
         for(int j = 0; j < 16; j++)
             obj_buffer[PIPE_DISPLAY_BASE + j].attr1 = (obj_buffer[PIPE_DISPLAY_BASE + j].attr1 & ~0x1FF) | ((new_x + (j % 8) * 8) & 0x1FF);
-    }
+    // }
 
     if(pipes_posX <= OFFSCREEN_LEFT)
     {

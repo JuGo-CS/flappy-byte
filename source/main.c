@@ -22,6 +22,7 @@ bool homescreen_state = false;  // false = state1, true = state2
 bool restart_state = false;
 int animation_counter = 0;
 bool first_time = true;  // Tracks if this is the initial game open
+static int game_score = 0;
 
 void load_homescreen_state1() {
     memcpy(pal_bg_mem, homescreen_state1Pal, homescreen_state1PalLen);
@@ -195,6 +196,7 @@ int main(void) {
             apply_byte_logic();
             byte_logic();
             byte_updated = true;
+            game_score++;
             // flickering_byte = 0;
         }
         
@@ -211,4 +213,3 @@ int main(void) {
     }
 }
 
-// Helper functions for clean background loading

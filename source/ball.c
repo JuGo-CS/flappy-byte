@@ -57,6 +57,10 @@ void reset_ball(){
     
 }
 
+void updating_score(){
+    
+}
+
 
 
 
