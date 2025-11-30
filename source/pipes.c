@@ -42,11 +42,11 @@ static void draw_pipe_values(int posX)
 {
     // Draw correct value at display_y[0] if is_correct[0], else decoy
     unsigned char value0 = is_correct[0] ? pipe_correct_value : pipe_incorrect_value;
-    draw_byte_bits(value0, posX - 4, display_y[0], PIPE_DISPLAY_BASE);
+    draw_byte_bits(value0, posX, display_y[0], PIPE_DISPLAY_BASE);
 
     // Draw correct value at display_y[1] if is_correct[1], else decoy
     unsigned char value1 = is_correct[1] ? pipe_correct_value : pipe_incorrect_value;
-    draw_byte_bits(value1, posX - 4, display_y[1], PIPE_DISPLAY_BASE + 8);
+    draw_byte_bits(value1, posX, display_y[1], PIPE_DISPLAY_BASE + 8);
 }
 
 static void clear_pipe_values()
