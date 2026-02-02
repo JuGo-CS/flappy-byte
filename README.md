@@ -1,4 +1,4 @@
-# Flappy Byte
+# ☀️ Flappy Byte
 
 > A Game Boy Advance (GBA) homebrew clone of Flappy Bird with an added "byte logic" mechanic.
 
@@ -83,3 +83,4 @@ The `graphics/` folder contains `.piskel` files (source art). Edit them in Piske
 
 ## Contact
 If you want me to help with building, packaging, or adding a license, tell me which OS and toolchain you use and I can add more precise instructions.
+
